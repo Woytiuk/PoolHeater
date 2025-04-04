@@ -1,5 +1,4 @@
 #include <LiquidCrystal.h>
-// Optional: comment these out if you're testing without a sensor
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -10,6 +9,9 @@ LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
 #define ONE_WIRE_BUS 7
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
+#define TARGET 30
+#define UPPER 82//Upper threshold in F
+#define LOWER 80//Lower threshold in F
 
 // === Pump Control Setup ===
 #define PUMP_PIN 6
@@ -29,14 +31,15 @@ void setup() {
   pinMode(PUMP_PIN, OUTPUT);
   digitalWrite(PUMP_PIN, LOW);
 
-  lcd.print("Pump Timer Ready");
+  lcd.print("Svarog Ready");
   delay(2000);
   lcd.clear();
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
+  //unsigned long currentMillis = millis();
 
+/* Used to test the pump if timer not working
   if (pumpOn && (currentMillis - lastToggleTime >= pumpOnDuration)) {
     pumpOn = false;
     lastToggleTime = currentMillis;
@@ -46,11 +49,28 @@ void loop() {
     lastToggleTime = currentMillis;
     digitalWrite(PUMP_PIN, HIGH);
   }
-
-  // Optional: real temp
+*/
+  // === Real Temp ===
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0); // Shows -127 if no sensor is connected
-
+  
+  if (pumpOn && tempF > UPPER){
+    pumpOn = false;
+    digitalWrite(PUMP_PIN, LOW);
+  } else if (!pumpOn && tempF < LOWER) {
+    pumpOn = true;
+    digitalWrite(PUMP_PIN, HIGH);
+  }
+  
+/*
+  if (pumpOn && tempC > TARGET){
+    pumpOn = false;
+    digitalWrite(PUMP_PIN, LOW);
+  } else if (!pumpOn && tempC < TARGET) {
+    pumpOn = true;
+    digitalWrite(PUMP_PIN, HIGH);
+  }
+*/
   // === LCD Output ===
   lcd.setCursor(0, 0);
   lcd.print("Temp: ");
