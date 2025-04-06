@@ -10,8 +10,8 @@ LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 #define TARGET 30
-#define UPPER 82//Upper threshold in F
-#define LOWER 80//Lower threshold in F
+#define UPPER 82//Upper threshold of the pool temp
+#define LOWER 80//Lower threshold of the pool temp
 
 // === Pump Control Setup ===
 #define PUMP_PIN 6
@@ -36,11 +36,14 @@ void setup() {
   lcd.clear();
 }
 
+float cToF(float celsius){
+  return (celsius * 9/5) + 32;
+}
+
 void loop() {
   //unsigned long currentMillis = millis();
 
-/* Used to test the pump if timer not working
-  if (pumpOn && (currentMillis - lastToggleTime >= pumpOnDuration)) {
+/*if (pumpOn && (currentMillis - lastToggleTime >= pumpOnDuration)) {
     pumpOn = false;
     lastToggleTime = currentMillis;
     digitalWrite(PUMP_PIN, LOW);
@@ -50,19 +53,21 @@ void loop() {
     digitalWrite(PUMP_PIN, HIGH);
   }
 */
-  // === Real Temp ===
+  // real temp
+  
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0); // Shows -127 if no sensor is connected
-  
+  float tempF = cToF(tempC);
   if (pumpOn && tempF > UPPER){
     pumpOn = false;
     digitalWrite(PUMP_PIN, LOW);
-  } else if (!pumpOn && tempF < LOWER) {
+  } else if (!pumpOn && tempF < LOWER){
     pumpOn = true;
     digitalWrite(PUMP_PIN, HIGH);
   }
+/* === Read in Temperature ===
   
-/*
+  // === Pump Control Logic ===
   if (pumpOn && tempC > TARGET){
     pumpOn = false;
     digitalWrite(PUMP_PIN, LOW);
@@ -73,9 +78,11 @@ void loop() {
 */
   // === LCD Output ===
   lcd.setCursor(0, 0);
-  lcd.print("Temp: ");
+  lcd.print("Temp:");
   lcd.print(tempC, 1);
-  lcd.print(" C  ");
+  lcd.print("C|");
+  lcd.print(tempF, 1);
+  lcd.print("F ");
 
   lcd.setCursor(0, 1);
   lcd.print("Pump: ");
