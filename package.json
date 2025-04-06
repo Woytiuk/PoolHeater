@@ -1,0 +1,15 @@
+{
+  "name": "poolheater",
+  "version": "1.0.0",
+  "description": "Automatic pool pump controler to ensure that the pool remains at a constant temperature using and arduino uno 3 board",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^4.1.3"
+  }
+}
