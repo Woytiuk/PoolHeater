@@ -1,7 +1,6 @@
 #include <LiquidCrystal.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <EEPROM.h>
 
 // === LCD Setup ===
 LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
@@ -11,8 +10,8 @@ LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-float upperThreshold = 82;
-float lowerThreshold = 80;
+float upperThreshold = 83;
+float lowerThreshold = 81;
 
 // === Pump Control Setup ===
 #define PUMP_PIN 6
@@ -22,30 +21,6 @@ bool pumpOn = false;
 unsigned long lastPumpOn = 0;
 unsigned long totalPumpMillis = 0;
 unsigned long lastSave = 0;
-
-void loadPumpTime() {
-  unsigned long storedTotal;
-  EEPROM.get(100, storedTotal);
-  if (!isnan(storedTotal)) {
-    totalPumpMillis = storedTotal;
-  } else {
-    totalPumpMillis = 0;
-  }
-}
-
-void savePumpTime(unsigned long sessionMillis) {
-  unsigned long stored;
-  EEPROM.get(100, stored);
-  if (isnan(stored)) stored = 0;
-  unsigned long averaged = (stored + sessionMillis) / 2;
-  EEPROM.put(100, averaged);
-  totalPumpMillis = averaged;
-}
-
-void resetPumpTime() {
-  totalPumpMillis = 0;
-  EEPROM.put(100, totalPumpMillis);
-}
 
 void setup() {
   Serial.begin(9600);
@@ -105,10 +80,6 @@ void loop() {
     savePumpTime(sessionMillis);
   }
 
-  if (millis() - lastSave > 300000) {
-    savePumpTime(0);
-    lastSave = millis();
-  }
 
   lcd.setCursor(0, 0);
   lcd.print("Temp:");
